@@ -1,0 +1,1859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego Matemático</title>
+  <style>
+    @font-face {
+      font-family: 'Fredoka';
+      src: url('./fonts/Fredoka-VariableFont_wdth,wght.ttf') format('truetype');
+    }
+
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-image: url('./imagenes/fondo-juego.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #startMenu {
+      margin-top: 5vh;
+      font-size: 1.8rem;
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    #startMenu input, #startMenu button {
+      font-size: 1.4rem;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 2px solid #4b9cd3;
+    }
+
+    #startMenu input {
+      width: 80%;
+      text-align: center;
+    }
+
+    #courseButtons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px auto;
+      max-width: 600px;
+    }
+
+    .course-btn {
+      background-color: #ffd966;
+      border: none;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      font-family: 'Fredoka', sans-serif;
+      border-radius: 15px;
+      box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .course-btn:hover {
+      background-color: #ffe599;
+      transform: scale(1.05);
+      box-shadow: 2px 6px 10px rgba(0,0,0,0.3);
+    }
+
+    #gameArea {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      margin: 40px auto;
+      max-width: 1000px;
+      width: 90%;
+    }
+
+    .card {
+      width: 260px;
+      height: 320px;
+      perspective: 1000px;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      padding: 15px;
+      box-sizing: border-box;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .front {
+      background-color: #cce5ff;
+      border: 3px solid #4b9cd3;
+    }
+
+    .card-face.front img {
+      width: 90%;
+      height: auto;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .card-face.front strong {
+      font-size: 1.4rem;
+      margin-top: 10px;
+      color: #333;
+      text-align: center;
+    }
+
+    .back {
+      background-color: #fff3cd;
+      border: 3px solid #ffd966;
+      transform: rotateY(180deg);
+      padding: 20px;
+    }
+
+    .back p {
+      margin: 5px 0;
+      text-align: center;
+    }
+
+    .back input {
+      width: 80%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 2px solid #999;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .back button {
+      background-color: #4b9cd3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .back button:hover {
+      background-color: #3a86b9;
+      transform: scale(1.05);
+    }
+    .imagen-proporcional {
+      width: 8cm; 
+      height: auto; 
+      display: block;
+      margin: 0 auto 15px;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    #gameControls {
+      display: none;
+      width: 90%;
+      max-width: 1000px;
+      margin: 20px auto;
+      justify-content: space-between;
+    }
+
+    #paginationControls {
+      display: flex;
+      gap: 20px;
+    }
+
+    #paginationControls button, #exitButton, #btnSalirAnticipadamente {
+      background-color: #9ad0f5;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      font-family: 'Fredoka', sans-serif;
+      border-radius: 15px;
+      box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #paginationControls button:hover, #exitButton:hover {
+      background-color: #b7e3fc;
+      transform: scale(1.05);
+    }
+
+    #btnSalirAnticipadamente {
+      background-color: #ff9999;
+    }
+
+    #btnSalirAnticipadamente:hover {
+      background-color: #ff7777;
+    }
+
+    #scorePanel {
+      font-size: 1.2rem;
+      font-weight: bold;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #finalScreenContainer {
+      display: none;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    #finalScreen button {
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      border-radius: 15px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #btnNuevoJugador {
+      background-color: #9ad0f5;
+    }
+
+    #btnFinalizarJuego {
+      background-color: #ff9999;
+    }
+
+    #retryButton {
+      background-color: #ffd966;
+    }
+
+    #rankingPorCurso {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    #rankingPorCurso table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+
+    #rankingPorCurso th, #rankingPorCurso td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    #rankingPorCurso th {
+      background-color: #4b9cd3;
+      color: white;
+    }
+
+    #rankingPorCurso tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    #rankingPorCurso tr.highlight {
+      background-color: #ffeebb;
+    }
+    
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes cardFlip {
+      0% { transform: rotateY(0); }
+      50% { transform: rotateY(90deg); }
+      100% { transform: rotateY(180deg); }
+    }
+    
+  </style>
+</head>
+<body>
+  <div id="startMenu">
+    <h2>Bienvenido al Juego Matematico</h2>
+    <div class="logo-container">
+    <img src="./imagenes/logo-silvania.png" alt="Niños de Silvania aprendiendo matemáticas" class="imagen-proporcional">
+  </div>
+    <input type="text" id="playerName" placeholder="Tu nombre" required>
+    <div id="courseButtons">
+      <button class="course-btn" data-course="1">Grado 1°</button>
+      <button class="course-btn" data-course="2">Grado 2°</button>
+      <button class="course-btn" data-course="3">Grado 3°</button>
+      <button class="course-btn" data-course="4">Grado 4°</button>
+      <button class="course-btn" data-course="5">Grado 5°</button>
+    </div>
+  </div>
+
+  <div id="gameArea"></div>
+
+  <div id="gameControls">
+    <div id="paginationControls">
+      <button id="prevPage">⬅ Página anterior</button>
+      <button id="nextPage">Página siguiente ➡</button>
+    </div>
+    <div id="scorePanel">Puntos: 0 | Respondidas: 0/0</div>
+    <div>
+      <button id="btnSalirAnticipadamente">⛔ Terminar y Mostrar Puntaje</button>
+      <button id="exitButton">🚪 Salir</button>
+    </div>
+  </div>
+
+  <div id="finalScreenContainer">
+    <div id="finalScreen">
+      <h2 id="finalScore"></h2>
+      <button id="retryButton">🔁 Reintentar (2)</button>
+      <button id="btnNuevoJugador">👤 Nuevo Jugador</button>
+      <button id="btnFinalizarJuego">🏁 Finalizar Juego</button>
+      <div id="rankingPorCurso"></div>
+    </div>
+  </div>
+
+  <script>
+    // Variables globales
+    let playerName = '';
+    let course = '';
+    let score = 0;
+    let currentPage = 0;
+    const cardsPerPage = 6;
+    let startTime;
+    let questions = [];
+    let retryCount = 2;
+
+    // Datos de ejemplo (deberás reemplazarlos con tus 30 preguntas por curso)
+    const preguntasPorCurso = {
+  "1": [
+    // GRADO 1° - 30 PREGUNTAS
+    {
+      lugar: "LA BRASA DE ROJAS",
+      imagen: "./imagenes/brojas.png",
+      pregunta: "HAY 4 MESAS CON 3 PERSONAS CADA UNA. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN : MULTIPLICAMOS 4 MESAS × 3 PERSONAS = 12 PERSONAS."
+    },
+    {
+      lugar: "PARROQUIA MARÍA AUXILIADORA",
+      imagen: "./imagenes/iglesia.png",
+      pregunta: "LLEGARON A MISA 7 PERSONAS Y LUEGO 5 MÁS. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 12,
+      mensaje: "¡CORRECTO! TOTAL: 12 PERSONAS"
+    },
+    {
+      lugar: "PAPELERIA NIKO",
+      imagen: "./imagenes/PAPELERIA.png",
+      pregunta: "PREGUNTA: EN LA PAPELERÍA NIKO HAY 8 CUADERNOS EN LA MESA Y LLEGAN 6 MÁS.¿CUÁNTOS CUADERNOS HAY EN TOTAL?",
+      operacion: "Sumar es muy fácil para ti.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 8 + 6 = 14CUADERNOS."
+    },
+    {
+      lugar: "PARQUE LA OCA",
+      imagen: "./imagenes/PARQUEOCA.png",
+      pregunta: "PREGUNTA: EN EL PARQUE LA OCA HAY 7 NIÑOS JUGANDO Y LLEGAN 5 NIÑOS MÁS.¿CUÁNTOS NIÑOS ESTÁN JUGANDO EN TOTAL?",
+      operacion: "Eres un campeón de la suma.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 7 + 5 = 12 NIÑOS"
+    },
+    {
+      lugar: "PARQUE PRINCIPAL",
+      imagen: "./imagenes/PARQUEP.png",
+      pregunta: "ADIVINANZA: EN EL PARQUE PRINCIPAL, HAY 5 ÁRBOLES Y LUEGO PLANTAN 4 MÁS. ¿CUÁNTOS ÁRBOLES HAY AHORA?",
+      operacion: "SI SUMAS BIEN, LARESPUESTA HALLARÁS.",
+      respuesta: 9,
+      mensaje: "EXPLICACIÓN: 5 + 4 = 9 ÁRBOLES."
+    },
+    {
+      lugar: "ALCALDIA DE SILVANIA",
+      imagen: "./imagenes/ALCALDIA.png",
+      pregunta: "PREGUNTA: EN LA ALCALDÍA DE SILVANIA HAY UN JARDÍN CON 4 ÁRBOLES ENFORMA DE CÍRCULO Y 3 ÁRBOLES EN FORMA DE CUADRADO. ¿CUÁNTOSÁRBOLES HAY EN TOTAL?",
+      operacion: "Sumemos como los superhéroes.",
+      respuesta: 7,
+      mensaje: "EXPLICACIÓN: SUMAMOS 4 (CÍRCULOS)+ 3 (CUADRADOS) = 7ÁRBOLES."
+    },
+    {
+      lugar: "COLEGIO SANTA INES",
+      imagen: "./imagenes/COLEGIO.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO SANTA INÉS, HAY 6 NIÑOS EN LA BIBLIOTECA Y LLEGAN 4 MÁS.¿CUÁNTOS NIÑOS HAY AHORA?",
+      operacion: "Suma como un genio matemático.",
+      respuesta: 10,
+      mensaje: "EXPLICACIÓN: SUMAMOS 6 + 4 = 10 NIÑOS."
+    },
+    {
+      lugar: "JARDIN LA PRADERA",
+      imagen: "./imagenes/JARDIN.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "ESTRELLA BRILLANTE 🌟 FELICITACIONES."
+    }, 
+    {
+      lugar: "VILLA OLIMPICA",
+      imagen: "./imagenes/VILLA OLIMPICA.png",
+      pregunta: "PREGUNTA: EN LA VILLO OLÍMPICA HAY UNA CANASTA CON 3 PELOTAS Y OTRA CON 2 PELOTAS MAS. ¿CUÁNTAS PELOTAS HAY EN TOTAL PARA JUGAR?",
+      operacion: "Vamos a juntar los números.",
+      respuesta: 5,
+      mensaje: "📣 ¡EN LA VILLO OLÍMPICA HAY 5 PELOTAS PARA JUGAR!"
+    },  
+    {
+      lugar: "MUNICIPIO DE SILVANIA",
+      imagen: "./imagenes/SILVANIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🌈 ARCOÍRIS MÁGICO"
+    },  
+    {
+      lugar: "AREPA QUE GUSTA",
+      imagen: "./imagenes/AREPA QUE GUSTA.png",
+      pregunta: "PREGUNTA: EN LA TIENDA “AREPA QUE GUSTA” COMPRARON 2 AREPAS DE QUESO Y 3 DE CHOCLO. ¿CUÁNTAS AREPAS HAY EN TOTAL?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 5,
+      mensaje: "📣 ¡EN “AREPA QUE GUSTA” HAY 5 AREPAS PARA DISFRUTAR!"
+    },
+    {
+      lugar: "MONUMENTO DE ISMAEL SILVA – FUNDADOR",
+      imagen: "./imagenes/MONUMENTO ISMAEL.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO A ISMAEL SILVA, AYER FUERON 4 PERSONAS Y HOY 3 MÁS. ¿CUÁNTAS PERSONAS VISITARON EN TOTAL?",
+      operacion: "¡Sumar es como contar amigos!",
+      respuesta: 7,
+      mensaje: "📣 ¡7 PERSONAS VISITARON EL MONUMENTO A ISMAEL SILVA!"
+    },
+    {
+      lugar: "MONUMENTO DEL ARRIERO Y CARRIZA",
+      imagen: "./imagenes/MONUMENTO ARRIERO.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO DEL ARRIERO Y CARRIZA, EL ARRIERO LLEVA 3 SACOS DE CAFE Y LUEGO CARGA 2 MÁS. ¿CUÁNTOS SACOS TIENE EN TOTAL?",
+      operacion: "Vamos a sumar los sacos",
+      respuesta: 5,
+      mensaje: "📣 ¡CORRECTO EL ARRIERO TIENE 5 SACOS PARA SU VIAJE!"
+    },
+    {
+      lugar: "CASA OFICINA DEL COMISARIATO EN LOS PUENTES",
+      imagen: "./imagenes/COMISARIATO.png",
+      pregunta: "PREGUNTA: EN LA CASA OFICINA DEL COMISARIATO HAY 4 LIBROS EN UNA MESA Y 3 EN OTRA. ¿CUÁNTOS LIBROS HAY EN TOTAL?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 7,
+      mensaje: "📣 CORRECTO ¡EN LA CASA OFICINA HAY 7 LIBROS PARA LEER!"
+    },
+    {
+      lugar: "CAPILLA DE NUESTRA SEÑORA DEL AMPARO EN LOS PUENTES",
+      imagen: "./imagenes/CAPILLA.png",
+      pregunta: "PREGUNTA: EN LA CAPILLA NUESTRA SEÑORA DEL AMPARO HAY 3 VELAS ENCENDIDAS Y 2 MÁS EN OTRO ALTAR. ¿CUÁNTAS VELAS HAY ENCENDIDAS?",
+      operacion: "Vamos a sumar velitas",
+      respuesta: 5,
+      mensaje: "SUMAMOS LAS VELAS: 3 + 2 = 5 VELAS. 📣 ¡LA CAPILLA ESTÁ ILUMINADA CON 5 VELAS!"
+    },
+    {
+      lugar: "ERMITA DEL SAGRADO CORAZON DE JESUS",
+      imagen: "./imagenes/ERMITA.png",
+      pregunta: "PREGUNTA: EN LA ERMITA DEL SAGRADO CORAZÓN, CADA DÍA ENCIENDEN 2 VELAS. SI YA PASARON 3 DÍAS, ¿CUÁNTAS VELAS SE ENCENDIERON?",
+      operacion: "Multiplicar es repetir la suma",
+      respuesta: 6,
+      mensaje: "SUMAMOS LAS VELAS POR DÍA: 2 + 2 + 2 = 6 VELAS. 📣 ¡LA ERMITA HA SIDO ILUMINADA CON 6 VELAS!"
+    },
+    {
+      lugar: "SUPERMERCADO ARA",
+      imagen: "./imagenes/ARA.png",
+      pregunta: "PREGUNTA: EN EL SUPERMERCADO EL ARA HAY 3 CARROS DE COMPRAS CON 2 MANZANAS CADA UNO. ¿CUÁNTAS MANZANAS HAY EN TOTAL?",
+      operacion: "SI SUMAS CARROS 3 VECES , LA MULTIPLICACION RESOLVERAS ",
+      respuesta: 6,
+      mensaje: "CORRECTO HAY EN TOTAL 6 MANZANAS 📣 ¡SUFICIENTE PARA UNA MERIENDA! ¿QUIÉN SE APUNTA? 🍎😋"
+    },
+    {
+      lugar: "PANADERIA LA CASA DEL PONQUE",
+      imagen: "./imagenes/PANADERIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎈 GLOBO VOLADOR FELICIDADES"
+    },
+    {
+      lugar: "HOSPITAL ISMAEL SILVA",
+      imagen: "./imagenes/HOSPITAL.png",
+      pregunta: "PREGUNTA: EN EL HOSPITAL ISMAEL SILVA HAY 5 DOCTORES Y CADA UNO ATIENDE A 3 PACIENTES. ¿CUÁNTOS PACIENTES ESTÁN ATENDIENDO EN TOTAL?",
+      operacion: "ES MUY FACIL POR TRES MULTIPLICAR",
+      respuesta: 15,
+      mensaje: "🔢 PROCESO: 5 × 3 = 15 PACIENTES 📣 ¡ESPEREMOS QUE LOS DOCTORES TAMBIÉN SE TOMEN UN CAFÉ! ☕😄"
+    },
+    {
+      lugar: "CHORRO DEL OASIS VEREDA VICTORIA ALTA SECTOR LAS LAJAS",
+      imagen: "./imagenes/CHORRO.png",
+      pregunta: "PREGUNTA: EN EL CHORRO DEL OASIS 6 PERSONAS LLEVAN 2 BOTELLAS DE AGUA CADA UNA. ¿CUÁNTAS BOTELLAS SALEN DEL CHORRO AL DIA?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "🔢 PROCESO: 6 × 2 = 12 BOTELLAS 📣 ¡CON TANTA AGUA NADIE TENDRÁ SED! 💧😜"
+    },
+    {
+      lugar: "ESCUELA DE LOS PUENTES",
+      imagen: "./imagenes/ESCUELA.png",
+      pregunta: "PREGUNTA: EN LA ESCUELA DE LOS PUENTES HAY 7 NIÑOS JUGANDO Y LLEGAN 3 MÁS. ¿CUÁNTOS NIÑOS ESTÁN JUGANDO AHORA?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 7 + 3 = 10 NIÑOS 📣 ¡MÁS PARA JUGAR Y DIVERTIRSE! 🎉😄"
+    },
+    {
+      lugar: "RESTAURANTE LA EMBAJADA PAISA",
+      imagen: "./imagenes/RESTAURANTE.png",
+      pregunta: "PREGUNTA: EN “LA EMBAJADA” PREPARARON 6 PLATOS DE ARROZ Y 4 DE POLLO. ¿CUÁNTOS PLATOS HAY EN TOTAL?",
+      operacion: "SI SUMAS BIEN, LO AVERIGUARAS.",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 PLATOS 📣 ¡PERFECTO PARA UNA GRAN FIESTA! 🎊🍽️"
+    },
+    {
+      lugar: "COLEGIO PAIDEIA",
+      imagen: "./imagenes/PAIDEA.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO PAIDEIA HAY 8 ESTUDIANTES EN LA CLASE Y 2 FALTARON. ¿CUÁNTOS ESTUDIANTES HAY EN CLASE?",
+      operacion: "!Ahora vamos a restar¡",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 8 – 2 = 6 ESTUDIANTES ALGUNOS PREFIEREN QUEDARSE EN CASA! 😅🏠"
+    },
+    {
+      lugar: "COLISEO CUBIERTO",
+      imagen: "./imagenes/COLISEO.png",
+      pregunta: "PREGUNTA: EN EL COLISEO MUNICIPAL JUEGAN 3 EQUIPOS Y CADA UNO MARCA 2 GOLES. ¿CUÁNTOS GOLES SE MARCARON EN TOTAL?",
+      operacion: "Que divertido es multiplicar.",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 3 × 2 = 6 GOLES 📣 ¡QUÉ BUEN PARTIDO! ⚽🥳"
+    },
+    {
+      lugar: "MONUMENTO DE DEMOSTENES ALBAÑIL CAMPESINO AGRICULTOR",
+      imagen: "./imagenes/MONUMENTO.png",
+      pregunta: "PREGUNTA: DEMÓSTENES TIENE 1 SOMBRERO EN FORMA DE TRIÁNGULO, 2 CANASTOS REDONDOS Y 1 BASE CUADRADA DONDE ESTÁ PARADO. ¿CUÁNTAS FIGURAS GEOMÉTRICAS VES?",
+      operacion: "¡A sumar figuras geometricas!",
+      respuesta: 4,
+      mensaje: "🔺 TRIÁNGULO: 1 ⚪ CÍRCULOS: 2 ◼️ CUADRADO: 1 ✅ TOTAL: 4 FIGURAS GEOMÉTRICAS"
+    },
+    {
+      lugar: "MUSEO TEMPLO DEL VALLENATO",
+      imagen: "./imagenes/MUSEO.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎉 CONFETI DE COLORES"
+    },
+    {
+      lugar: "CALLE ECOLOGICA",
+      imagen: "./imagenes/CALLE ECOLOGICA.png",
+      pregunta: "PREGUNTA: EN LA CALLE ECOLÓGICA HAY 6 ÁRBOLES A LA IZQUIERDA Y 4 A LA DERECHA. ¿CUÁNTOS ÁRBOLES HAY EN TOTAL?",
+      operacion: "¡vamos a Sumar arboles!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 📣 ¡UN TÚNEL VERDE PARA CAMINAR FELIZ! 🌳😊🌳"
+    },
+    {
+      lugar: "PLAZUELA ZUTAGAO",
+      imagen: "./imagenes/PLAZUELA.png",
+      pregunta: "PREGUNTA: HAY 8 BANCOS EN LA PLAZUELA Y 3 ESTÁN OCUPADOS. ¿CUÁNTOS BANCOS ESTÁN LIBRES?",
+      operacion: "vamos restemos, para la respuesta hallar",
+      respuesta: 5,
+      mensaje: "🔢 PROCESO: 8 – 3 = 5 📣 ¡SUFICIENTES PARA SENTARSE A COMER OBLEAS! 🧁😋"
+    }, 
+    {
+      lugar: "PLAZA DE LOS FUNDADORES",
+      imagen: "./imagenes/PLAZAFUNDA.png",
+      pregunta: "PREGUNTA: EN LA PLAZA DE LOS FUNDADORES HAY 2 FUENTES DE AGUA Y EN CADA UNA NADAN 5 PATITOS. ¿CUÁNTOS PATITOS HAY?",
+      operacion: "Vamos a multiplicar patitos",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 2 × 5 = 10 📣 ¡LOS FUNDADORES ESTAN CAUTIVADOS POR TANTA TERNURA! 🦆🦆🦆🦆🦆💧"
+    },
+    {
+      lugar: "PUENTE ECOLOGICO",
+      imagen: "./imagenes/PUENTE-ECO.png",
+      pregunta: "EL PUENTE ECOLÓGICO. TIENE 2 TORRES RECTANGULARES, UN CAMINO RECTÁNGULAR LARGO Y 4 RUEDAS EN FORMA DE CÍRCULOS PINTADAS A LOS LADOS. ¿CUÁNTAS FIGURAS GEOMÉTRICAS HAY EN TOTAL?",
+      operacion: "sumemos figuras",
+      respuesta: 7,
+      mensaje: "🟦 RECTÁNGULOS: 2 TORRES + 1 CAMINO = 3 ⚪ CÍRCULOS: 4 ➡️ TOTAL: 3 + 4 = 7 FIGURAS GEOMÉTRICAS"
+    },
+  ],
+
+  "2": [
+    // GRADO 2° - 30 PREGUNTAS
+    {
+      lugar: "LA BRASA DE ROJAS",
+      imagen: "./imagenes/brojas.png",
+      pregunta: "HAY 4 MESAS CON 3 PERSONAS CADA UNA. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN : MULTIPLICAMOS 4 MESAS × 3 PERSONAS = 12 PERSONAS."
+    },
+    {
+      lugar: "PARROQUIA MARÍA AUXILIADORA",
+      imagen: "./imagenes/iglesia.png",
+      pregunta: "LLEGARON A MISA 7 PERSONAS Y LUEGO 5 MÁS. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 12,
+      mensaje: "¡CORRECTO! TOTAL: 12 PERSONAS"
+    },
+    {
+      lugar: "PAPELERIA NIKO",
+      imagen: "./imagenes/PAPELERIA.png",
+      pregunta: "PREGUNTA: EN LA PAPELERÍA NIKO HAY 8 CUADERNOS EN LA MESA Y LLEGAN 6 MÁS.¿CUÁNTOS CUADERNOS HAY EN TOTAL?",
+      operacion: "Sumar es muy fácil para ti.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 8 + 6 = 14CUADERNOS."
+    },
+    {
+      lugar: "PARQUE LA OCA",
+      imagen: "./imagenes/PARQUEOCA.png",
+      pregunta: "PREGUNTA: EN EL PARQUE LA OCA HAY 7 NIÑOS JUGANDO Y LLEGAN 5 NIÑOS MÁS.¿CUÁNTOS NIÑOS ESTÁN JUGANDO EN TOTAL?",
+      operacion: "Eres un campeón de la suma.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 7 + 5 = 12 NIÑOS"
+    },
+    {
+      lugar: "PARQUE PRINCIPAL",
+      imagen: "./imagenes/PARQUEP.png",
+      pregunta: "ADIVINANZA: EN EL PARQUE PRINCIPAL, HAY 5 ÁRBOLES Y LUEGO PLANTAN 4 MÁS. ¿CUÁNTOS ÁRBOLES HAY AHORA?",
+      operacion: "SI SUMAS BIEN, LARESPUESTA HALLARÁS.",
+      respuesta: 9,
+      mensaje: "EXPLICACIÓN: 5 + 4 = 9 ÁRBOLES."
+    },
+    {
+      lugar: "ALCALDIA DE SILVANIA",
+      imagen: "./imagenes/ALCALDIA.png",
+      pregunta: "PREGUNTA: EN LA ALCALDÍA DE SILVANIA HAY UN JARDÍN CON 4 ÁRBOLES ENFORMA DE CÍRCULO Y 3 ÁRBOLES EN FORMA DE CUADRADO. ¿CUÁNTOSÁRBOLES HAY EN TOTAL?",
+      operacion: "Sumemos como los superhéroes.",
+      respuesta: 7,
+      mensaje: "EXPLICACIÓN: SUMAMOS 4 (CÍRCULOS)+ 3 (CUADRADOS) = 7ÁRBOLES."
+    },
+    {
+      lugar: "COLEGIO SANTA INES",
+      imagen: "./imagenes/COLEGIO.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO SANTA INÉS, HAY 6 NIÑOS EN LA BIBLIOTECA Y LLEGAN 4 MÁS.¿CUÁNTOS NIÑOS HAY AHORA?",
+      operacion: "Suma como un genio matemático.",
+      respuesta: 10,
+      mensaje: "EXPLICACIÓN: SUMAMOS 6 + 4 = 10 NIÑOS."
+    },
+    {
+      lugar: "JARDIN LA PRADERA",
+      imagen: "./imagenes/JARDIN.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "ESTRELLA BRILLANTE 🌟 FELICITACIONES."
+    }, 
+    {
+      lugar: "VILLA OLIMPICA",
+      imagen: "./imagenes/VILLA OLIMPICA.png",
+      pregunta: "PREGUNTA: EN LA VILLO OLÍMPICA HAY UNA CANASTA CON 3 PELOTAS Y OTRA CON 2 PELOTAS MAS. ¿CUÁNTAS PELOTAS HAY EN TOTAL PARA JUGAR?",
+      operacion: "Vamos a juntar los números.",
+      respuesta: 5,
+      mensaje: "📣 ¡EN LA VILLO OLÍMPICA HAY 5 PELOTAS PARA JUGAR!"
+    },  
+    {
+      lugar: "MUNICIPIO DE SILVANIA",
+      imagen: "./imagenes/SILVANIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🌈 ARCOÍRIS MÁGICO"
+    },  
+    {
+      lugar: "AREPA QUE GUSTA",
+      imagen: "./imagenes/AREPA QUE GUSTA.png",
+      pregunta: "PREGUNTA: EN LA TIENDA “AREPA QUE GUSTA” COMPRARON 2 AREPAS DE QUESO Y 3 DE CHOCLO. ¿CUÁNTAS AREPAS HAY EN TOTAL?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 5,
+      mensaje: "📣 ¡EN “AREPA QUE GUSTA” HAY 5 AREPAS PARA DISFRUTAR!"
+    },
+    {
+      lugar: "MONUMENTO DE ISMAEL SILVA – FUNDADOR",
+      imagen: "./imagenes/MONUMENTO ISMAEL.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO A ISMAEL SILVA, AYER FUERON 4 PERSONAS Y HOY 3 MÁS. ¿CUÁNTAS PERSONAS VISITARON EN TOTAL?",
+      operacion: "¡Sumar es como contar amigos!",
+      respuesta: 7,
+      mensaje: "📣 ¡7 PERSONAS VISITARON EL MONUMENTO A ISMAEL SILVA!"
+    },
+    {
+      lugar: "MONUMENTO DEL ARRIERO Y CARRIZA",
+      imagen: "./imagenes/MONUMENTO ARRIERO.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO DEL ARRIERO Y CARRIZA, EL ARRIERO LLEVA 3 SACOS DE CAFE Y LUEGO CARGA 2 MÁS. ¿CUÁNTOS SACOS TIENE EN TOTAL?",
+      operacion: "Vamos a sumar los sacos",
+      respuesta: 5,
+      mensaje: "📣 ¡CORRECTO EL ARRIERO TIENE 5 SACOS PARA SU VIAJE!"
+    },
+    {
+      lugar: "CASA OFICINA DEL COMISARIATO EN LOS PUENTES",
+      imagen: "./imagenes/COMISARIATO.png",
+      pregunta: "PREGUNTA: EN LA CASA OFICINA DEL COMISARIATO HAY 4 LIBROS EN UNA MESA Y 3 EN OTRA. ¿CUÁNTOS LIBROS HAY EN TOTAL?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 7,
+      mensaje: "📣 CORRECTO ¡EN LA CASA OFICINA HAY 7 LIBROS PARA LEER!"
+    },
+    {
+      lugar: "CAPILLA DE NUESTRA SEÑORA DEL AMPARO EN LOS PUENTES",
+      imagen: "./imagenes/CAPILLA.png",
+      pregunta: "PREGUNTA: EN LA CAPILLA NUESTRA SEÑORA DEL AMPARO HAY 3 VELAS ENCENDIDAS Y 2 MÁS EN OTRO ALTAR. ¿CUÁNTAS VELAS HAY ENCENDIDAS?",
+      operacion: "Vamos a sumar velitas",
+      respuesta: 5,
+      mensaje: "SUMAMOS LAS VELAS: 3 + 2 = 5 VELAS. 📣 ¡LA CAPILLA ESTÁ ILUMINADA CON 5 VELAS!"
+    },
+    {
+      lugar: "ERMITA DEL SAGRADO CORAZON DE JESUS",
+      imagen: "./imagenes/ERMITA.png",
+      pregunta: "PREGUNTA: EN LA ERMITA DEL SAGRADO CORAZÓN, CADA DÍA ENCIENDEN 2 VELAS. SI YA PASARON 3 DÍAS, ¿CUÁNTAS VELAS SE ENCENDIERON?",
+      operacion: "Multiplicar es repetir la suma",
+      respuesta: 6,
+      mensaje: "SUMAMOS LAS VELAS POR DÍA: 2 + 2 + 2 = 6 VELAS. 📣 ¡LA ERMITA HA SIDO ILUMINADA CON 6 VELAS!"
+    },
+    {
+      lugar: "SUPERMERCADO ARA",
+      imagen: "./imagenes/ARA.png",
+      pregunta: "PREGUNTA: EN EL SUPERMERCADO EL ARA HAY 3 CARROS DE COMPRAS CON 2 MANZANAS CADA UNO. ¿CUÁNTAS MANZANAS HAY EN TOTAL?",
+      operacion: "SI SUMAS CARROS 3 VECES , LA MULTIPLICACION RESOLVERAS ",
+      respuesta: 6,
+      mensaje: "CORRECTO HAY EN TOTAL 6 MANZANAS 📣 ¡SUFICIENTE PARA UNA MERIENDA! ¿QUIÉN SE APUNTA? 🍎😋"
+    },
+    {
+      lugar: "PANADERIA LA CASA DEL PONQUE",
+      imagen: "./imagenes/PANADERIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎈 GLOBO VOLADOR FELICIDADES"
+    },
+    {
+      lugar: "HOSPITAL ISMAEL SILVA",
+      imagen: "./imagenes/HOSPITAL.png",
+      pregunta: "PREGUNTA: EN EL HOSPITAL ISMAEL SILVA HAY 5 DOCTORES Y CADA UNO ATIENDE A 3 PACIENTES. ¿CUÁNTOS PACIENTES ESTÁN ATENDIENDO EN TOTAL?",
+      operacion: "ES MUY FACIL POR TRES MULTIPLICAR",
+      respuesta: 15,
+      mensaje: "🔢 PROCESO: 5 × 3 = 15 PACIENTES 📣 ¡ESPEREMOS QUE LOS DOCTORES TAMBIÉN SE TOMEN UN CAFÉ! ☕😄"
+    },
+    {
+      lugar: "CHORRO DEL OASIS VEREDA VICTORIA ALTA SECTOR LAS LAJAS",
+      imagen: "./imagenes/CHORRO.png",
+      pregunta: "PREGUNTA: EN EL CHORRO DEL OASIS 6 PERSONAS LLEVAN 2 BOTELLAS DE AGUA CADA UNA. ¿CUÁNTAS BOTELLAS SALEN DEL CHORRO AL DIA?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "🔢 PROCESO: 6 × 2 = 12 BOTELLAS 📣 ¡CON TANTA AGUA NADIE TENDRÁ SED! 💧😜"
+    },
+    {
+      lugar: "ESCUELA DE LOS PUENTES",
+      imagen: "./imagenes/ESCUELA.png",
+      pregunta: "PREGUNTA: EN LA ESCUELA DE LOS PUENTES HAY 7 NIÑOS JUGANDO Y LLEGAN 3 MÁS. ¿CUÁNTOS NIÑOS ESTÁN JUGANDO AHORA?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 7 + 3 = 10 NIÑOS 📣 ¡MÁS PARA JUGAR Y DIVERTIRSE! 🎉😄"
+    },
+    {
+      lugar: "RESTAURANTE LA EMBAJADA PAISA",
+      imagen: "./imagenes/RESTAURANTE.png",
+      pregunta: "PREGUNTA: EN “LA EMBAJADA” PREPARARON 6 PLATOS DE ARROZ Y 4 DE POLLO. ¿CUÁNTOS PLATOS HAY EN TOTAL?",
+      operacion: "SI SUMAS BIEN, LO AVERIGUARAS.",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 PLATOS 📣 ¡PERFECTO PARA UNA GRAN FIESTA! 🎊🍽️"
+    },
+    {
+      lugar: "COLEGIO PAIDEIA",
+      imagen: "./imagenes/PAIDEA.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO PAIDEIA HAY 8 ESTUDIANTES EN LA CLASE Y 2 FALTARON. ¿CUÁNTOS ESTUDIANTES HAY EN CLASE?",
+      operacion: "!Ahora vamos a restar¡",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 8 – 2 = 6 ESTUDIANTES ALGUNOS PREFIEREN QUEDARSE EN CASA! 😅🏠"
+    },
+    {
+      lugar: "COLISEO CUBIERTO",
+      imagen: "./imagenes/COLISEO.png",
+      pregunta: "PREGUNTA: EN EL COLISEO MUNICIPAL JUEGAN 3 EQUIPOS Y CADA UNO MARCA 2 GOLES. ¿CUÁNTOS GOLES SE MARCARON EN TOTAL?",
+      operacion: "Que divertido es multiplicar.",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 3 × 2 = 6 GOLES 📣 ¡QUÉ BUEN PARTIDO! ⚽🥳"
+    },
+    {
+      lugar: "MONUMENTO DE DEMOSTENES ALBAÑIL CAMPESINO AGRICULTOR",
+      imagen: "./imagenes/MONUMENTO.png",
+      pregunta: "PREGUNTA: DEMÓSTENES TIENE 1 SOMBRERO EN FORMA DE TRIÁNGULO, 2 CANASTOS REDONDOS Y 1 BASE CUADRADA DONDE ESTÁ PARADO. ¿CUÁNTAS FIGURAS GEOMÉTRICAS VES?",
+      operacion: "¡A sumar figuras geometricas!",
+      respuesta: 4,
+      mensaje: "🔺 TRIÁNGULO: 1 ⚪ CÍRCULOS: 2 ◼️ CUADRADO: 1 ✅ TOTAL: 4 FIGURAS GEOMÉTRICAS"
+    },
+    {
+      lugar: "MUSEO TEMPLO DEL VALLENATO",
+      imagen: "./imagenes/MUSEO.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎉 CONFETI DE COLORES"
+    },
+    {
+      lugar: "CALLE ECOLOGICA",
+      imagen: "./imagenes/CALLE ECOLOGICA.png",
+      pregunta: "PREGUNTA: EN LA CALLE ECOLÓGICA HAY 6 ÁRBOLES A LA IZQUIERDA Y 4 A LA DERECHA. ¿CUÁNTOS ÁRBOLES HAY EN TOTAL?",
+      operacion: "¡vamos a Sumar arboles!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 📣 ¡UN TÚNEL VERDE PARA CAMINAR FELIZ! 🌳😊🌳"
+    },
+    {
+      lugar: "PLAZUELA ZUTAGAO",
+      imagen: "./imagenes/PLAZUELA.png",
+      pregunta: "PREGUNTA: HAY 8 BANCOS EN LA PLAZUELA Y 3 ESTÁN OCUPADOS. ¿CUÁNTOS BANCOS ESTÁN LIBRES?",
+      operacion: "vamos restemos, para la respuesta hallar",
+      respuesta: 5,
+      mensaje: "🔢 PROCESO: 8 – 3 = 5 📣 ¡SUFICIENTES PARA SENTARSE A COMER OBLEAS! 🧁😋"
+    }, 
+    {
+      lugar: "PLAZA DE LOS FUNDADORES",
+      imagen: "./imagenes/PLAZAFUNDA.png",
+      pregunta: "PREGUNTA: EN LA PLAZA DE LOS FUNDADORES HAY 2 FUENTES DE AGUA Y EN CADA UNA NADAN 5 PATITOS. ¿CUÁNTOS PATITOS HAY?",
+      operacion: "Vamos a multiplicar patitos",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 2 × 5 = 10 📣 ¡LOS FUNDADORES ESTAN CAUTIVADOS POR TANTA TERNURA! 🦆🦆🦆🦆🦆💧"
+    },
+    {
+      lugar: "PUENTE ECOLOGICO",
+      imagen: "./imagenes/PUENTE-ECO.png",
+      pregunta: "PREGUNTA: IMAGINA EL PUENTE ECOLÓGICO. TIENE 2 TORRES RECTANGULARES, UN CAMINO QUE PARECE UN RECTÁNGULO LARGO Y 4 RUEDAS EN FORMA DE CÍRCULOS PINTADAS A LOS LADOS. ¿CUÁNTAS FIGURAS GEOMÉTRICAS HAY EN TOTAL?",
+      operacion: "Vamos sumemos las figuras",
+      respuesta: 7,
+      mensaje: "🟦 RECTÁNGULOS: 2 TORRES + 1 CAMINO = 3 ⚪ CÍRCULOS: 4 ➡️ TOTAL: 3 + 4 = 7 FIGURAS GEOMÉTRICAS"
+    },
+  ],
+
+  "3": [
+    // GRADO 3° - 30 PREGUNTAS
+    {
+      lugar: "LA BRASA DE ROJAS",
+      imagen: "./imagenes/brojas.png",
+      pregunta: "HAY 4 MESAS CON 3 PERSONAS CADA UNA. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN : MULTIPLICAMOS 4 MESAS × 3 PERSONAS = 12 PERSONAS."
+    },
+    {
+      lugar: "PARROQUIA MARÍA AUXILIADORA",
+      imagen: "./imagenes/iglesia.png",
+      pregunta: "LLEGARON A MISA 7 PERSONAS Y LUEGO 5 MÁS. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 12,
+      mensaje: "¡CORRECTO! TOTAL: 12 PERSONAS"
+    },
+    {
+      lugar: "PAPELERIA NIKO",
+      imagen: "./imagenes/PAPELERIA.png",
+      pregunta: "PREGUNTA: EN LA PAPELERÍA NIKO HAY 8 CUADERNOS EN LA MESA Y LLEGAN 6 MÁS.¿CUÁNTOS CUADERNOS HAY EN TOTAL?",
+      operacion: "Sumar es muy fácil para ti.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 8 + 6 = 14CUADERNOS."
+    },
+    {
+      lugar: "PARQUE LA OCA",
+      imagen: "./imagenes/PARQUEOCA.png",
+      pregunta: "PREGUNTA: EN EL PARQUE LA OCA HAY 7 NIÑOS JUGANDO Y LLEGAN 5 NIÑOS MÁS.¿CUÁNTOS NIÑOS ESTÁN JUGANDO EN TOTAL?",
+      operacion: "Eres un campeón de la suma.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 7 + 5 = 12 NIÑOS"
+    },
+    {
+      lugar: "PARQUE PRINCIPAL",
+      imagen: "./imagenes/PARQUEP.png",
+      pregunta: "ADIVINANZA: EN EL PARQUE PRINCIPAL, HAY 5 ÁRBOLES Y LUEGO PLANTAN 4 MÁS. ¿CUÁNTOS ÁRBOLES HAY AHORA?",
+      operacion: "SI SUMAS BIEN, LARESPUESTA HALLARÁS.",
+      respuesta: 9,
+      mensaje: "EXPLICACIÓN: 5 + 4 = 9 ÁRBOLES."
+    },
+    {
+      lugar: "ALCALDIA DE SILVANIA",
+      imagen: "./imagenes/ALCALDIA.png",
+      pregunta: "PREGUNTA: EN LA ALCALDÍA DE SILVANIA HAY UN JARDÍN CON 4 ÁRBOLES ENFORMA DE CÍRCULO Y 3 ÁRBOLES EN FORMA DE CUADRADO. ¿CUÁNTOSÁRBOLES HAY EN TOTAL?",
+      operacion: "Sumemos como los superhéroes.",
+      respuesta: 7,
+      mensaje: "EXPLICACIÓN: SUMAMOS 4 (CÍRCULOS)+ 3 (CUADRADOS) = 7ÁRBOLES."
+    },
+    {
+      lugar: "COLEGIO SANTA INES",
+      imagen: "./imagenes/COLEGIO.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO SANTA INÉS, HAY 6 NIÑOS EN LA BIBLIOTECA Y LLEGAN 4 MÁS.¿CUÁNTOS NIÑOS HAY AHORA?",
+      operacion: "Suma como un genio matemático.",
+      respuesta: 10,
+      mensaje: "EXPLICACIÓN: SUMAMOS 6 + 4 = 10 NIÑOS."
+    },
+    {
+      lugar: "JARDIN LA PRADERA",
+      imagen: "./imagenes/JARDIN.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "ESTRELLA BRILLANTE 🌟 FELICITACIONES."
+    }, 
+    {
+      lugar: "VILLA OLIMPICA",
+      imagen: "./imagenes/VILLA OLIMPICA.png",
+      pregunta: "PREGUNTA: EN LA VILLO OLÍMPICA HAY UNA CANASTA CON 3 PELOTAS Y OTRA CON 2 PELOTAS MAS. ¿CUÁNTAS PELOTAS HAY EN TOTAL PARA JUGAR?",
+      operacion: "Vamos a juntar los números.",
+      respuesta: 5,
+      mensaje: "📣 ¡EN LA VILLO OLÍMPICA HAY 5 PELOTAS PARA JUGAR!"
+    },  
+    {
+      lugar: "MUNICIPIO DE SILVANIA",
+      imagen: "./imagenes/SILVANIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🌈 ARCOÍRIS MÁGICO"
+    },  
+    {
+      lugar: "AREPA QUE GUSTA",
+      imagen: "./imagenes/AREPA QUE GUSTA.png",
+      pregunta: "PREGUNTA: EN LA TIENDA “AREPA QUE GUSTA” COMPRARON 2 AREPAS DE QUESO Y 3 DE CHOCLO. ¿CUÁNTAS AREPAS HAY EN TOTAL?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 5,
+      mensaje: "📣 ¡EN “AREPA QUE GUSTA” HAY 5 AREPAS PARA DISFRUTAR!"
+    },
+    {
+      lugar: "MONUMENTO DE ISMAEL SILVA – FUNDADOR",
+      imagen: "./imagenes/MONUMENTO ISMAEL.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO A ISMAEL SILVA, AYER FUERON 4 PERSONAS Y HOY 3 MÁS. ¿CUÁNTAS PERSONAS VISITARON EN TOTAL?",
+      operacion: "¡Sumar es como contar amigos!",
+      respuesta: 7,
+      mensaje: "📣 ¡7 PERSONAS VISITARON EL MONUMENTO A ISMAEL SILVA!"
+    },
+    {
+      lugar: "MONUMENTO DEL ARRIERO Y CARRIZA",
+      imagen: "./imagenes/MONUMENTO ARRIERO.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO DEL ARRIERO Y CARRIZA, EL ARRIERO LLEVA 3 SACOS DE CAFE Y LUEGO CARGA 2 MÁS. ¿CUÁNTOS SACOS TIENE EN TOTAL?",
+      operacion: "Vamos a sumar los sacos",
+      respuesta: 5,
+      mensaje: "📣 ¡CORRECTO EL ARRIERO TIENE 5 SACOS PARA SU VIAJE!"
+    },
+    {
+      lugar: "CASA OFICINA DEL COMISARIATO EN LOS PUENTES",
+      imagen: "./imagenes/COMISARIATO.png",
+      pregunta: "PREGUNTA: EN LA CASA OFICINA DEL COMISARIATO HAY 4 LIBROS EN UNA MESA Y 3 EN OTRA. ¿CUÁNTOS LIBROS HAY EN TOTAL?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 7,
+      mensaje: "📣 CORRECTO ¡EN LA CASA OFICINA HAY 7 LIBROS PARA LEER!"
+    },
+    {
+      lugar: "CAPILLA DE NUESTRA SEÑORA DEL AMPARO EN LOS PUENTES",
+      imagen: "./imagenes/CAPILLA.png",
+      pregunta: "PREGUNTA: EN LA CAPILLA NUESTRA SEÑORA DEL AMPARO HAY 3 VELAS ENCENDIDAS Y 2 MÁS EN OTRO ALTAR. ¿CUÁNTAS VELAS HAY ENCENDIDAS?",
+      operacion: "Vamos a sumar velitas",
+      respuesta: 5,
+      mensaje: "SUMAMOS LAS VELAS: 3 + 2 = 5 VELAS. 📣 ¡LA CAPILLA ESTÁ ILUMINADA CON 5 VELAS!"
+    },
+    {
+      lugar: "ERMITA DEL SAGRADO CORAZON DE JESUS",
+      imagen: "./imagenes/ERMITA.png",
+      pregunta: "PREGUNTA: EN LA ERMITA DEL SAGRADO CORAZÓN, CADA DÍA ENCIENDEN 2 VELAS. SI YA PASARON 3 DÍAS, ¿CUÁNTAS VELAS SE ENCENDIERON?",
+      operacion: "Multiplicar es repetir la suma",
+      respuesta: 6,
+      mensaje: "SUMAMOS LAS VELAS POR DÍA: 2 + 2 + 2 = 6 VELAS. 📣 ¡LA ERMITA HA SIDO ILUMINADA CON 6 VELAS!"
+    },
+    {
+      lugar: "SUPERMERCADO ARA",
+      imagen: "./imagenes/ARA.png",
+      pregunta: "PREGUNTA: EN EL SUPERMERCADO EL ARA HAY 3 CARROS DE COMPRAS CON 2 MANZANAS CADA UNO. ¿CUÁNTAS MANZANAS HAY EN TOTAL?",
+      operacion: "SI SUMAS CARROS 3 VECES , LA MULTIPLICACION RESOLVERAS ",
+      respuesta: 6,
+      mensaje: "CORRECTO HAY EN TOTAL 6 MANZANAS 📣 ¡SUFICIENTE PARA UNA MERIENDA! ¿QUIÉN SE APUNTA? 🍎😋"
+    },
+    {
+      lugar: "PANADERIA LA CASA DEL PONQUE",
+      imagen: "./imagenes/PANADERIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎈 GLOBO VOLADOR FELICIDADES"
+    },
+    {
+      lugar: "HOSPITAL ISMAEL SILVA",
+      imagen: "./imagenes/HOSPITAL.png",
+      pregunta: "PREGUNTA: EN EL HOSPITAL ISMAEL SILVA HAY 5 DOCTORES Y CADA UNO ATIENDE A 3 PACIENTES. ¿CUÁNTOS PACIENTES ESTÁN ATENDIENDO EN TOTAL?",
+      operacion: "ES MUY FACIL POR TRES MULTIPLICAR",
+      respuesta: 15,
+      mensaje: "🔢 PROCESO: 5 × 3 = 15 PACIENTES 📣 ¡ESPEREMOS QUE LOS DOCTORES TAMBIÉN SE TOMEN UN CAFÉ! ☕😄"
+    },
+    {
+      lugar: "CHORRO DEL OASIS VEREDA VICTORIA ALTA SECTOR LAS LAJAS",
+      imagen: "./imagenes/CHORRO.png",
+      pregunta: "PREGUNTA: EN EL CHORRO DEL OASIS 6 PERSONAS LLEVAN 2 BOTELLAS DE AGUA CADA UNA. ¿CUÁNTAS BOTELLAS SALEN DEL CHORRO AL DIA?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "🔢 PROCESO: 6 × 2 = 12 BOTELLAS 📣 ¡CON TANTA AGUA NADIE TENDRÁ SED! 💧😜"
+    },
+    {
+      lugar: "ESCUELA DE LOS PUENTES",
+      imagen: "./imagenes/ESCUELA.png",
+      pregunta: "PREGUNTA: EN LA ESCUELA DE LOS PUENTES HAY 7 NIÑOS JUGANDO Y LLEGAN 3 MÁS. ¿CUÁNTOS NIÑOS ESTÁN JUGANDO AHORA?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 7 + 3 = 10 NIÑOS 📣 ¡MÁS PARA JUGAR Y DIVERTIRSE! 🎉😄"
+    },
+    {
+      lugar: "RESTAURANTE LA EMBAJADA PAISA",
+      imagen: "./imagenes/RESTAURANTE.png",
+      pregunta: "PREGUNTA: EN “LA EMBAJADA” PREPARARON 6 PLATOS DE ARROZ Y 4 DE POLLO. ¿CUÁNTOS PLATOS HAY EN TOTAL?",
+      operacion: "SI SUMAS BIEN, LO AVERIGUARAS.",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 PLATOS 📣 ¡PERFECTO PARA UNA GRAN FIESTA! 🎊🍽️"
+    },
+    {
+      lugar: "COLEGIO PAIDEIA",
+      imagen: "./imagenes/PAIDEA.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO PAIDEIA HAY 8 ESTUDIANTES EN LA CLASE Y 2 FALTARON. ¿CUÁNTOS ESTUDIANTES HAY EN CLASE?",
+      operacion: "!Ahora vamos a restar¡",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 8 – 2 = 6 ESTUDIANTES ALGUNOS PREFIEREN QUEDARSE EN CASA! 😅🏠"
+    },
+    {
+      lugar: "COLISEO CUBIERTO",
+      imagen: "./imagenes/COLISEO.png",
+      pregunta: "PREGUNTA: EN EL COLISEO MUNICIPAL JUEGAN 3 EQUIPOS Y CADA UNO MARCA 2 GOLES. ¿CUÁNTOS GOLES SE MARCARON EN TOTAL?",
+      operacion: "Que divertido es multiplicar.",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 3 × 2 = 6 GOLES 📣 ¡QUÉ BUEN PARTIDO! ⚽🥳"
+    },
+    {
+      lugar: "MONUMENTO DE DEMOSTENES ALBAÑIL CAMPESINO AGRICULTOR",
+      imagen: "./imagenes/MONUMENTO.png",
+      pregunta: "PREGUNTA: DEMÓSTENES TIENE 1 SOMBRERO EN FORMA DE TRIÁNGULO, 2 CANASTOS REDONDOS Y 1 BASE CUADRADA DONDE ESTÁ PARADO. ¿CUÁNTAS FIGURAS GEOMÉTRICAS VES?",
+      operacion: "¡A sumar figuras geometricas!",
+      respuesta: 4,
+      mensaje: "🔺 TRIÁNGULO: 1 ⚪ CÍRCULOS: 2 ◼️ CUADRADO: 1 ✅ TOTAL: 4 FIGURAS GEOMÉTRICAS"
+    },
+    {
+      lugar: "MUSEO TEMPLO DEL VALLENATO",
+      imagen: "./imagenes/MUSEO.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎉 CONFETI DE COLORES"
+    },
+    {
+      lugar: "CALLE ECOLOGICA",
+      imagen: "./imagenes/CALLE ECOLOGICA.png",
+      pregunta: "PREGUNTA: EN LA CALLE ECOLÓGICA HAY 6 ÁRBOLES A LA IZQUIERDA Y 4 A LA DERECHA. ¿CUÁNTOS ÁRBOLES HAY EN TOTAL?",
+      operacion: "¡vamos a Sumar arboles!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 📣 ¡UN TÚNEL VERDE PARA CAMINAR FELIZ! 🌳😊🌳"
+    },
+    {
+      lugar: "PLAZUELA ZUTAGAO",
+      imagen: "./imagenes/PLAZUELA.png",
+      pregunta: "PREGUNTA: HAY 8 BANCOS EN LA PLAZUELA Y 3 ESTÁN OCUPADOS. ¿CUÁNTOS BANCOS ESTÁN LIBRES?",
+      operacion: "vamos restemos, para la respuesta hallar",
+      respuesta: 5,
+      mensaje: "🔢 PROCESO: 8 – 3 = 5 📣 ¡SUFICIENTES PARA SENTARSE A COMER OBLEAS! 🧁😋"
+    }, 
+    {
+      lugar: "PLAZA DE LOS FUNDADORES",
+      imagen: "./imagenes/PLAZAFUNDA.png",
+      pregunta: "PREGUNTA: EN LA PLAZA DE LOS FUNDADORES HAY 2 FUENTES DE AGUA Y EN CADA UNA NADAN 5 PATITOS. ¿CUÁNTOS PATITOS HAY?",
+      operacion: "Vamos a multiplicar patitos",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 2 × 5 = 10 📣 ¡LOS FUNDADORES ESTAN CAUTIVADOS POR TANTA TERNURA! 🦆🦆🦆🦆🦆💧"
+    },
+    {
+      lugar: "PUENTE ECOLOGICO",
+      imagen: "./imagenes/PUENTE-ECO.png",
+      pregunta: "PREGUNTA: IMAGINA EL PUENTE ECOLÓGICO. TIENE 2 TORRES RECTANGULARES, UN CAMINO QUE PARECE UN RECTÁNGULO LARGO Y 4 RUEDAS EN FORMA DE CÍRCULOS PINTADAS A LOS LADOS. ¿CUÁNTAS FIGURAS GEOMÉTRICAS HAY EN TOTAL?",
+      operacion: "Vamos sumemos las figuras",
+      respuesta: 7,
+      mensaje: "🟦 RECTÁNGULOS: 2 TORRES + 1 CAMINO = 3 ⚪ CÍRCULOS: 4 ➡️ TOTAL: 3 + 4 = 7 FIGURAS GEOMÉTRICAS"
+    },
+  ],
+
+  "4": [
+    // GRADO 4° - 30 PREGUNTAS
+    {
+      lugar: "LA BRASA DE ROJAS",
+      imagen: "./imagenes/brojas.png",
+      pregunta: "HAY 4 MESAS CON 3 PERSONAS CADA UNA. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN : MULTIPLICAMOS 4 MESAS × 3 PERSONAS = 12 PERSONAS."
+    },
+    {
+      lugar: "PARROQUIA MARÍA AUXILIADORA",
+      imagen: "./imagenes/iglesia.png",
+      pregunta: "LLEGARON A MISA 7 PERSONAS Y LUEGO 5 MÁS. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 12,
+      mensaje: "¡CORRECTO! TOTAL: 12 PERSONAS"
+    },
+    {
+      lugar: "PAPELERIA NIKO",
+      imagen: "./imagenes/PAPELERIA.png",
+      pregunta: "PREGUNTA: EN LA PAPELERÍA NIKO HAY 8 CUADERNOS EN LA MESA Y LLEGAN 6 MÁS.¿CUÁNTOS CUADERNOS HAY EN TOTAL?",
+      operacion: "Sumar es muy fácil para ti.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 8 + 6 = 14CUADERNOS."
+    },
+    {
+      lugar: "PARQUE LA OCA",
+      imagen: "./imagenes/PARQUEOCA.png",
+      pregunta: "PREGUNTA: EN EL PARQUE LA OCA HAY 7 NIÑOS JUGANDO Y LLEGAN 5 NIÑOS MÁS.¿CUÁNTOS NIÑOS ESTÁN JUGANDO EN TOTAL?",
+      operacion: "Eres un campeón de la suma.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 7 + 5 = 12 NIÑOS"
+    },
+    {
+      lugar: "PARQUE PRINCIPAL",
+      imagen: "./imagenes/PARQUEP.png",
+      pregunta: "ADIVINANZA: EN EL PARQUE PRINCIPAL, HAY 5 ÁRBOLES Y LUEGO PLANTAN 4 MÁS. ¿CUÁNTOS ÁRBOLES HAY AHORA?",
+      operacion: "SI SUMAS BIEN, LARESPUESTA HALLARÁS.",
+      respuesta: 9,
+      mensaje: "EXPLICACIÓN: 5 + 4 = 9 ÁRBOLES."
+    },
+    {
+      lugar: "ALCALDIA DE SILVANIA",
+      imagen: "./imagenes/ALCALDIA.png",
+      pregunta: "PREGUNTA: EN LA ALCALDÍA DE SILVANIA HAY UN JARDÍN CON 4 ÁRBOLES ENFORMA DE CÍRCULO Y 3 ÁRBOLES EN FORMA DE CUADRADO. ¿CUÁNTOSÁRBOLES HAY EN TOTAL?",
+      operacion: "Sumemos como los superhéroes.",
+      respuesta: 7,
+      mensaje: "EXPLICACIÓN: SUMAMOS 4 (CÍRCULOS)+ 3 (CUADRADOS) = 7ÁRBOLES."
+    },
+    {
+      lugar: "COLEGIO SANTA INES",
+      imagen: "./imagenes/COLEGIO.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO SANTA INÉS, HAY 6 NIÑOS EN LA BIBLIOTECA Y LLEGAN 4 MÁS.¿CUÁNTOS NIÑOS HAY AHORA?",
+      operacion: "Suma como un genio matemático.",
+      respuesta: 10,
+      mensaje: "EXPLICACIÓN: SUMAMOS 6 + 4 = 10 NIÑOS."
+    },
+    {
+      lugar: "JARDIN LA PRADERA",
+      imagen: "./imagenes/JARDIN.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "ESTRELLA BRILLANTE 🌟 FELICITACIONES."
+    }, 
+    {
+      lugar: "VILLA OLIMPICA",
+      imagen: "./imagenes/VILLA OLIMPICA.png",
+      pregunta: "PREGUNTA: EN LA VILLO OLÍMPICA HAY UNA CANASTA CON 3 PELOTAS Y OTRA CON 2 PELOTAS MAS. ¿CUÁNTAS PELOTAS HAY EN TOTAL PARA JUGAR?",
+      operacion: "Vamos a juntar los números.",
+      respuesta: 5,
+      mensaje: "📣 ¡EN LA VILLO OLÍMPICA HAY 5 PELOTAS PARA JUGAR!"
+    },  
+    {
+      lugar: "MUNICIPIO DE SILVANIA",
+      imagen: "./imagenes/SILVANIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🌈 ARCOÍRIS MÁGICO"
+    },  
+    {
+      lugar: "AREPA QUE GUSTA",
+      imagen: "./imagenes/AREPA QUE GUSTA.png",
+      pregunta: "PREGUNTA: EN LA TIENDA “AREPA QUE GUSTA” COMPRARON 2 AREPAS DE QUESO Y 3 DE CHOCLO. ¿CUÁNTAS AREPAS HAY EN TOTAL?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 5,
+      mensaje: "📣 ¡EN “AREPA QUE GUSTA” HAY 5 AREPAS PARA DISFRUTAR!"
+    },
+    {
+      lugar: "MONUMENTO DE ISMAEL SILVA – FUNDADOR",
+      imagen: "./imagenes/MONUMENTO ISMAEL.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO A ISMAEL SILVA, AYER FUERON 4 PERSONAS Y HOY 3 MÁS. ¿CUÁNTAS PERSONAS VISITARON EN TOTAL?",
+      operacion: "¡Sumar es como contar amigos!",
+      respuesta: 7,
+      mensaje: "📣 ¡7 PERSONAS VISITARON EL MONUMENTO A ISMAEL SILVA!"
+    },
+    {
+      lugar: "MONUMENTO DEL ARRIERO Y CARRIZA",
+      imagen: "./imagenes/MONUMENTO ARRIERO.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO DEL ARRIERO Y CARRIZA, EL ARRIERO LLEVA 3 SACOS DE CAFE Y LUEGO CARGA 2 MÁS. ¿CUÁNTOS SACOS TIENE EN TOTAL?",
+      operacion: "Vamos a sumar los sacos",
+      respuesta: 5,
+      mensaje: "📣 ¡CORRECTO EL ARRIERO TIENE 5 SACOS PARA SU VIAJE!"
+    },
+    {
+      lugar: "CASA OFICINA DEL COMISARIATO EN LOS PUENTES",
+      imagen: "./imagenes/COMISARIATO.png",
+      pregunta: "PREGUNTA: EN LA CASA OFICINA DEL COMISARIATO HAY 4 LIBROS EN UNA MESA Y 3 EN OTRA. ¿CUÁNTOS LIBROS HAY EN TOTAL?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 7,
+      mensaje: "📣 CORRECTO ¡EN LA CASA OFICINA HAY 7 LIBROS PARA LEER!"
+    },
+    {
+      lugar: "CAPILLA DE NUESTRA SEÑORA DEL AMPARO EN LOS PUENTES",
+      imagen: "./imagenes/CAPILLA.png",
+      pregunta: "PREGUNTA: EN LA CAPILLA NUESTRA SEÑORA DEL AMPARO HAY 3 VELAS ENCENDIDAS Y 2 MÁS EN OTRO ALTAR. ¿CUÁNTAS VELAS HAY ENCENDIDAS?",
+      operacion: "Vamos a sumar velitas",
+      respuesta: 5,
+      mensaje: "SUMAMOS LAS VELAS: 3 + 2 = 5 VELAS. 📣 ¡LA CAPILLA ESTÁ ILUMINADA CON 5 VELAS!"
+    },
+    {
+      lugar: "ERMITA DEL SAGRADO CORAZON DE JESUS",
+      imagen: "./imagenes/ERMITA.png",
+      pregunta: "PREGUNTA: EN LA ERMITA DEL SAGRADO CORAZÓN, CADA DÍA ENCIENDEN 2 VELAS. SI YA PASARON 3 DÍAS, ¿CUÁNTAS VELAS SE ENCENDIERON?",
+      operacion: "Multiplicar es repetir la suma",
+      respuesta: 6,
+      mensaje: "SUMAMOS LAS VELAS POR DÍA: 2 + 2 + 2 = 6 VELAS. 📣 ¡LA ERMITA HA SIDO ILUMINADA CON 6 VELAS!"
+    },
+    {
+      lugar: "SUPERMERCADO ARA",
+      imagen: "./imagenes/ARA.png",
+      pregunta: "PREGUNTA: EN EL SUPERMERCADO EL ARA HAY 3 CARROS DE COMPRAS CON 2 MANZANAS CADA UNO. ¿CUÁNTAS MANZANAS HAY EN TOTAL?",
+      operacion: "SI SUMAS CARROS 3 VECES , LA MULTIPLICACION RESOLVERAS ",
+      respuesta: 6,
+      mensaje: "CORRECTO HAY EN TOTAL 6 MANZANAS 📣 ¡SUFICIENTE PARA UNA MERIENDA! ¿QUIÉN SE APUNTA? 🍎😋"
+    },
+    {
+      lugar: "PANADERIA LA CASA DEL PONQUE",
+      imagen: "./imagenes/PANADERIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎈 GLOBO VOLADOR FELICIDADES"
+    },
+    {
+      lugar: "HOSPITAL ISMAEL SILVA",
+      imagen: "./imagenes/HOSPITAL.png",
+      pregunta: "PREGUNTA: EN EL HOSPITAL ISMAEL SILVA HAY 5 DOCTORES Y CADA UNO ATIENDE A 3 PACIENTES. ¿CUÁNTOS PACIENTES ESTÁN ATENDIENDO EN TOTAL?",
+      operacion: "ES MUY FACIL POR TRES MULTIPLICAR",
+      respuesta: 15,
+      mensaje: "🔢 PROCESO: 5 × 3 = 15 PACIENTES 📣 ¡ESPEREMOS QUE LOS DOCTORES TAMBIÉN SE TOMEN UN CAFÉ! ☕😄"
+    },
+    {
+      lugar: "CHORRO DEL OASIS VEREDA VICTORIA ALTA SECTOR LAS LAJAS",
+      imagen: "./imagenes/CHORRO.png",
+      pregunta: "PREGUNTA: EN EL CHORRO DEL OASIS 6 PERSONAS LLEVAN 2 BOTELLAS DE AGUA CADA UNA. ¿CUÁNTAS BOTELLAS SALEN DEL CHORRO AL DIA?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "🔢 PROCESO: 6 × 2 = 12 BOTELLAS 📣 ¡CON TANTA AGUA NADIE TENDRÁ SED! 💧😜"
+    },
+    {
+      lugar: "ESCUELA DE LOS PUENTES",
+      imagen: "./imagenes/ESCUELA.png",
+      pregunta: "PREGUNTA: EN LA ESCUELA DE LOS PUENTES HAY 7 NIÑOS JUGANDO Y LLEGAN 3 MÁS. ¿CUÁNTOS NIÑOS ESTÁN JUGANDO AHORA?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 7 + 3 = 10 NIÑOS 📣 ¡MÁS PARA JUGAR Y DIVERTIRSE! 🎉😄"
+    },
+    {
+      lugar: "RESTAURANTE LA EMBAJADA PAISA",
+      imagen: "./imagenes/RESTAURANTE.png",
+      pregunta: "PREGUNTA: EN “LA EMBAJADA” PREPARARON 6 PLATOS DE ARROZ Y 4 DE POLLO. ¿CUÁNTOS PLATOS HAY EN TOTAL?",
+      operacion: "SI SUMAS BIEN, LO AVERIGUARAS.",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 PLATOS 📣 ¡PERFECTO PARA UNA GRAN FIESTA! 🎊🍽️"
+    },
+    {
+      lugar: "COLEGIO PAIDEIA",
+      imagen: "./imagenes/PAIDEA.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO PAIDEIA HAY 8 ESTUDIANTES EN LA CLASE Y 2 FALTARON. ¿CUÁNTOS ESTUDIANTES HAY EN CLASE?",
+      operacion: "!Ahora vamos a restar¡",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 8 – 2 = 6 ESTUDIANTES ALGUNOS PREFIEREN QUEDARSE EN CASA! 😅🏠"
+    },
+    {
+      lugar: "COLISEO CUBIERTO",
+      imagen: "./imagenes/COLISEO.png",
+      pregunta: "PREGUNTA: EN EL COLISEO MUNICIPAL JUEGAN 3 EQUIPOS Y CADA UNO MARCA 2 GOLES. ¿CUÁNTOS GOLES SE MARCARON EN TOTAL?",
+      operacion: "Que divertido es multiplicar.",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 3 × 2 = 6 GOLES 📣 ¡QUÉ BUEN PARTIDO! ⚽🥳"
+    },
+    {
+      lugar: "MONUMENTO DE DEMOSTENES ALBAÑIL CAMPESINO AGRICULTOR",
+      imagen: "./imagenes/MONUMENTO.png",
+      pregunta: "PREGUNTA: DEMÓSTENES TIENE 1 SOMBRERO EN FORMA DE TRIÁNGULO, 2 CANASTOS REDONDOS Y 1 BASE CUADRADA DONDE ESTÁ PARADO. ¿CUÁNTAS FIGURAS GEOMÉTRICAS VES?",
+      operacion: "¡A sumar figuras geometricas!",
+      respuesta: 4,
+      mensaje: "🔺 TRIÁNGULO: 1 ⚪ CÍRCULOS: 2 ◼️ CUADRADO: 1 ✅ TOTAL: 4 FIGURAS GEOMÉTRICAS"
+    },
+    {
+      lugar: "MUSEO TEMPLO DEL VALLENATO",
+      imagen: "./imagenes/MUSEO.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎉 CONFETI DE COLORES"
+    },
+    {
+      lugar: "CALLE ECOLOGICA",
+      imagen: "./imagenes/CALLE ECOLOGICA.png",
+      pregunta: "PREGUNTA: EN LA CALLE ECOLÓGICA HAY 6 ÁRBOLES A LA IZQUIERDA Y 4 A LA DERECHA. ¿CUÁNTOS ÁRBOLES HAY EN TOTAL?",
+      operacion: "¡vamos a Sumar arboles!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 📣 ¡UN TÚNEL VERDE PARA CAMINAR FELIZ! 🌳😊🌳"
+    },
+    {
+      lugar: "PLAZUELA ZUTAGAO",
+      imagen: "./imagenes/PLAZUELA.png",
+      pregunta: "PREGUNTA: HAY 8 BANCOS EN LA PLAZUELA Y 3 ESTÁN OCUPADOS. ¿CUÁNTOS BANCOS ESTÁN LIBRES?",
+      operacion: "vamos restemos, para la respuesta hallar",
+      respuesta: 5,
+      mensaje: "🔢 PROCESO: 8 – 3 = 5 📣 ¡SUFICIENTES PARA SENTARSE A COMER OBLEAS! 🧁😋"
+    }, 
+    {
+      lugar: "PLAZA DE LOS FUNDADORES",
+      imagen: "./imagenes/PLAZAFUNDA.png",
+      pregunta: "PREGUNTA: EN LA PLAZA DE LOS FUNDADORES HAY 2 FUENTES DE AGUA Y EN CADA UNA NADAN 5 PATITOS. ¿CUÁNTOS PATITOS HAY?",
+      operacion: "Vamos a multiplicar patitos",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 2 × 5 = 10 📣 ¡LOS FUNDADORES ESTAN CAUTIVADOS POR TANTA TERNURA! 🦆🦆🦆🦆🦆💧"
+    },
+    {
+      lugar: "PUENTE ECOLOGICO",
+      imagen: "./imagenes/PUENTE-ECO.png",
+      pregunta: "PREGUNTA: IMAGINA EL PUENTE ECOLÓGICO. TIENE 2 TORRES RECTANGULARES, UN CAMINO QUE PARECE UN RECTÁNGULO LARGO Y 4 RUEDAS EN FORMA DE CÍRCULOS PINTADAS A LOS LADOS. ¿CUÁNTAS FIGURAS GEOMÉTRICAS HAY EN TOTAL?",
+      operacion: "Vamos sumemos las figuras",
+      respuesta: 7,
+      mensaje: "🟦 RECTÁNGULOS: 2 TORRES + 1 CAMINO = 3 ⚪ CÍRCULOS: 4 ➡️ TOTAL: 3 + 4 = 7 FIGURAS GEOMÉTRICAS"
+    },
+  ],
+    // ... Agrega 29 preguntas más para Grado 4°
+  "5": [
+    // GRADO 5° - 30 PREGUNTAS
+    {
+      lugar: "LA BRASA DE ROJAS",
+      imagen: "./imagenes/brojas.png",
+      pregunta: "HAY 4 MESAS CON 3 PERSONAS CADA UNA. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN : MULTIPLICAMOS 4 MESAS × 3 PERSONAS = 12 PERSONAS."
+    },
+    {
+      lugar: "PARROQUIA MARÍA AUXILIADORA",
+      imagen: "./imagenes/iglesia.png",
+      pregunta: "LLEGARON A MISA 7 PERSONAS Y LUEGO 5 MÁS. ¿CUÁNTAS PERSONAS HAY?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 12,
+      mensaje: "¡CORRECTO! TOTAL: 12 PERSONAS"
+    },
+    {
+      lugar: "PAPELERIA NIKO",
+      imagen: "./imagenes/PAPELERIA.png",
+      pregunta: "PREGUNTA: EN LA PAPELERÍA NIKO HAY 8 CUADERNOS EN LA MESA Y LLEGAN 6 MÁS.¿CUÁNTOS CUADERNOS HAY EN TOTAL?",
+      operacion: "Sumar es muy fácil para ti.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 8 + 6 = 14CUADERNOS."
+    },
+    {
+      lugar: "PARQUE LA OCA",
+      imagen: "./imagenes/PARQUEOCA.png",
+      pregunta: "PREGUNTA: EN EL PARQUE LA OCA HAY 7 NIÑOS JUGANDO Y LLEGAN 5 NIÑOS MÁS.¿CUÁNTOS NIÑOS ESTÁN JUGANDO EN TOTAL?",
+      operacion: "Eres un campeón de la suma.",
+      respuesta: 12,
+      mensaje: "EXPLICACIÓN: SUMAMOS 7 + 5 = 12 NIÑOS"
+    },
+    {
+      lugar: "PARQUE PRINCIPAL",
+      imagen: "./imagenes/PARQUEP.png",
+      pregunta: "ADIVINANZA: EN EL PARQUE PRINCIPAL, HAY 5 ÁRBOLES Y LUEGO PLANTAN 4 MÁS. ¿CUÁNTOS ÁRBOLES HAY AHORA?",
+      operacion: "SI SUMAS BIEN, LARESPUESTA HALLARÁS.",
+      respuesta: 9,
+      mensaje: "EXPLICACIÓN: 5 + 4 = 9 ÁRBOLES."
+    },
+    {
+      lugar: "ALCALDIA DE SILVANIA",
+      imagen: "./imagenes/ALCALDIA.png",
+      pregunta: "PREGUNTA: EN LA ALCALDÍA DE SILVANIA HAY UN JARDÍN CON 4 ÁRBOLES ENFORMA DE CÍRCULO Y 3 ÁRBOLES EN FORMA DE CUADRADO. ¿CUÁNTOSÁRBOLES HAY EN TOTAL?",
+      operacion: "Sumemos como los superhéroes.",
+      respuesta: 7,
+      mensaje: "EXPLICACIÓN: SUMAMOS 4 (CÍRCULOS)+ 3 (CUADRADOS) = 7ÁRBOLES."
+    },
+    {
+      lugar: "COLEGIO SANTA INES",
+      imagen: "./imagenes/COLEGIO.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO SANTA INÉS, HAY 6 NIÑOS EN LA BIBLIOTECA Y LLEGAN 4 MÁS.¿CUÁNTOS NIÑOS HAY AHORA?",
+      operacion: "Suma como un genio matemático.",
+      respuesta: 10,
+      mensaje: "EXPLICACIÓN: SUMAMOS 6 + 4 = 10 NIÑOS."
+    },
+    {
+      lugar: "JARDIN LA PRADERA",
+      imagen: "./imagenes/JARDIN.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "ESTRELLA BRILLANTE 🌟 FELICITACIONES."
+    }, 
+    {
+      lugar: "VILLA OLIMPICA",
+      imagen: "./imagenes/VILLA OLIMPICA.png",
+      pregunta: "PREGUNTA: EN LA VILLO OLÍMPICA HAY UNA CANASTA CON 3 PELOTAS Y OTRA CON 2 PELOTAS MAS. ¿CUÁNTAS PELOTAS HAY EN TOTAL PARA JUGAR?",
+      operacion: "Vamos a juntar los números.",
+      respuesta: 5,
+      mensaje: "📣 ¡EN LA VILLO OLÍMPICA HAY 5 PELOTAS PARA JUGAR!"
+    },  
+    {
+      lugar: "MUNICIPIO DE SILVANIA",
+      imagen: "./imagenes/SILVANIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🌈 ARCOÍRIS MÁGICO"
+    },  
+    {
+      lugar: "AREPA QUE GUSTA",
+      imagen: "./imagenes/AREPA QUE GUSTA.png",
+      pregunta: "PREGUNTA: EN LA TIENDA “AREPA QUE GUSTA” COMPRARON 2 AREPAS DE QUESO Y 3 DE CHOCLO. ¿CUÁNTAS AREPAS HAY EN TOTAL?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 5,
+      mensaje: "📣 ¡EN “AREPA QUE GUSTA” HAY 5 AREPAS PARA DISFRUTAR!"
+    },
+    {
+      lugar: "MONUMENTO DE ISMAEL SILVA – FUNDADOR",
+      imagen: "./imagenes/MONUMENTO ISMAEL.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO A ISMAEL SILVA, AYER FUERON 4 PERSONAS Y HOY 3 MÁS. ¿CUÁNTAS PERSONAS VISITARON EN TOTAL?",
+      operacion: "¡Sumar es como contar amigos!",
+      respuesta: 7,
+      mensaje: "📣 ¡7 PERSONAS VISITARON EL MONUMENTO A ISMAEL SILVA!"
+    },
+    {
+      lugar: "MONUMENTO DEL ARRIERO Y CARRIZA",
+      imagen: "./imagenes/MONUMENTO ARRIERO.png",
+      pregunta: "PREGUNTA: EN EL MONUMENTO DEL ARRIERO Y CARRIZA, EL ARRIERO LLEVA 3 SACOS DE CAFE Y LUEGO CARGA 2 MÁS. ¿CUÁNTOS SACOS TIENE EN TOTAL?",
+      operacion: "Vamos a sumar los sacos",
+      respuesta: 5,
+      mensaje: "📣 ¡CORRECTO EL ARRIERO TIENE 5 SACOS PARA SU VIAJE!"
+    },
+    {
+      lugar: "CASA OFICINA DEL COMISARIATO EN LOS PUENTES",
+      imagen: "./imagenes/COMISARIATO.png",
+      pregunta: "PREGUNTA: EN LA CASA OFICINA DEL COMISARIATO HAY 4 LIBROS EN UNA MESA Y 3 EN OTRA. ¿CUÁNTOS LIBROS HAY EN TOTAL?",
+      operacion: "¡Desbloquea el resultado sumando!",
+      respuesta: 7,
+      mensaje: "📣 CORRECTO ¡EN LA CASA OFICINA HAY 7 LIBROS PARA LEER!"
+    },
+    {
+      lugar: "CAPILLA DE NUESTRA SEÑORA DEL AMPARO EN LOS PUENTES",
+      imagen: "./imagenes/CAPILLA.png",
+      pregunta: "PREGUNTA: EN LA CAPILLA NUESTRA SEÑORA DEL AMPARO HAY 3 VELAS ENCENDIDAS Y 2 MÁS EN OTRO ALTAR. ¿CUÁNTAS VELAS HAY ENCENDIDAS?",
+      operacion: "Vamos a sumar velitas",
+      respuesta: 5,
+      mensaje: "SUMAMOS LAS VELAS: 3 + 2 = 5 VELAS. 📣 ¡LA CAPILLA ESTÁ ILUMINADA CON 5 VELAS!"
+    },
+    {
+      lugar: "ERMITA DEL SAGRADO CORAZON DE JESUS",
+      imagen: "./imagenes/ERMITA.png",
+      pregunta: "PREGUNTA: EN LA ERMITA DEL SAGRADO CORAZÓN, CADA DÍA ENCIENDEN 2 VELAS. SI YA PASARON 3 DÍAS, ¿CUÁNTAS VELAS SE ENCENDIERON?",
+      operacion: "Multiplicar es repetir la suma",
+      respuesta: 6,
+      mensaje: "SUMAMOS LAS VELAS POR DÍA: 2 + 2 + 2 = 6 VELAS. 📣 ¡LA ERMITA HA SIDO ILUMINADA CON 6 VELAS!"
+    },
+    {
+      lugar: "SUPERMERCADO ARA",
+      imagen: "./imagenes/ARA.png",
+      pregunta: "PREGUNTA: EN EL SUPERMERCADO EL ARA HAY 3 CARROS DE COMPRAS CON 2 MANZANAS CADA UNO. ¿CUÁNTAS MANZANAS HAY EN TOTAL?",
+      operacion: "SI SUMAS CARROS 3 VECES , LA MULTIPLICACION RESOLVERAS ",
+      respuesta: 6,
+      mensaje: "CORRECTO HAY EN TOTAL 6 MANZANAS 📣 ¡SUFICIENTE PARA UNA MERIENDA! ¿QUIÉN SE APUNTA? 🍎😋"
+    },
+    {
+      lugar: "PANADERIA LA CASA DEL PONQUE",
+      imagen: "./imagenes/PANADERIA.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎈 GLOBO VOLADOR FELICIDADES"
+    },
+    {
+      lugar: "HOSPITAL ISMAEL SILVA",
+      imagen: "./imagenes/HOSPITAL.png",
+      pregunta: "PREGUNTA: EN EL HOSPITAL ISMAEL SILVA HAY 5 DOCTORES Y CADA UNO ATIENDE A 3 PACIENTES. ¿CUÁNTOS PACIENTES ESTÁN ATENDIENDO EN TOTAL?",
+      operacion: "ES MUY FACIL POR TRES MULTIPLICAR",
+      respuesta: 15,
+      mensaje: "🔢 PROCESO: 5 × 3 = 15 PACIENTES 📣 ¡ESPEREMOS QUE LOS DOCTORES TAMBIÉN SE TOMEN UN CAFÉ! ☕😄"
+    },
+    {
+      lugar: "CHORRO DEL OASIS VEREDA VICTORIA ALTA SECTOR LAS LAJAS",
+      imagen: "./imagenes/CHORRO.png",
+      pregunta: "PREGUNTA: EN EL CHORRO DEL OASIS 6 PERSONAS LLEVAN 2 BOTELLAS DE AGUA CADA UNA. ¿CUÁNTAS BOTELLAS SALEN DEL CHORRO AL DIA?",
+      operacion: "¡Haz magia con la multiplicación!",
+      respuesta: 12,
+      mensaje: "🔢 PROCESO: 6 × 2 = 12 BOTELLAS 📣 ¡CON TANTA AGUA NADIE TENDRÁ SED! 💧😜"
+    },
+    {
+      lugar: "ESCUELA DE LOS PUENTES",
+      imagen: "./imagenes/ESCUELA.png",
+      pregunta: "PREGUNTA: EN LA ESCUELA DE LOS PUENTES HAY 7 NIÑOS JUGANDO Y LLEGAN 3 MÁS. ¿CUÁNTOS NIÑOS ESTÁN JUGANDO AHORA?",
+      operacion: "¡Hora de sumar!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 7 + 3 = 10 NIÑOS 📣 ¡MÁS PARA JUGAR Y DIVERTIRSE! 🎉😄"
+    },
+    {
+      lugar: "RESTAURANTE LA EMBAJADA PAISA",
+      imagen: "./imagenes/RESTAURANTE.png",
+      pregunta: "PREGUNTA: EN “LA EMBAJADA” PREPARARON 6 PLATOS DE ARROZ Y 4 DE POLLO. ¿CUÁNTOS PLATOS HAY EN TOTAL?",
+      operacion: "SI SUMAS BIEN, LO AVERIGUARAS.",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 PLATOS 📣 ¡PERFECTO PARA UNA GRAN FIESTA! 🎊🍽️"
+    },
+    {
+      lugar: "COLEGIO PAIDEIA",
+      imagen: "./imagenes/PAIDEA.png",
+      pregunta: "PREGUNTA: EN EL COLEGIO PAIDEIA HAY 8 ESTUDIANTES EN LA CLASE Y 2 FALTARON. ¿CUÁNTOS ESTUDIANTES HAY EN CLASE?",
+      operacion: "!Ahora vamos a restar¡",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 8 – 2 = 6 ESTUDIANTES ALGUNOS PREFIEREN QUEDARSE EN CASA! 😅🏠"
+    },
+    {
+      lugar: "COLISEO CUBIERTO",
+      imagen: "./imagenes/COLISEO.png",
+      pregunta: "PREGUNTA: EN EL COLISEO MUNICIPAL JUEGAN 3 EQUIPOS Y CADA UNO MARCA 2 GOLES. ¿CUÁNTOS GOLES SE MARCARON EN TOTAL?",
+      operacion: "Que divertido es multiplicar.",
+      respuesta: 6,
+      mensaje: "🔢 PROCESO: 3 × 2 = 6 GOLES 📣 ¡QUÉ BUEN PARTIDO! ⚽🥳"
+    },
+    {
+      lugar: "MONUMENTO DE DEMOSTENES ALBAÑIL CAMPESINO AGRICULTOR",
+      imagen: "./imagenes/MONUMENTO.png",
+      pregunta: "PREGUNTA: DEMÓSTENES TIENE 1 SOMBRERO EN FORMA DE TRIÁNGULO, 2 CANASTOS REDONDOS Y 1 BASE CUADRADA DONDE ESTÁ PARADO. ¿CUÁNTAS FIGURAS GEOMÉTRICAS VES?",
+      operacion: "¡A sumar figuras geometricas!",
+      respuesta: 4,
+      mensaje: "🔺 TRIÁNGULO: 1 ⚪ CÍRCULOS: 2 ◼️ CUADRADO: 1 ✅ TOTAL: 4 FIGURAS GEOMÉTRICAS"
+    },
+    {
+      lugar: "MUSEO TEMPLO DEL VALLENATO",
+      imagen: "./imagenes/MUSEO.png",
+      pregunta: "LOS NIÑOS AVANZAN EN EL JUEGO Y RECIBEN UNA TARJETA SORPRESA",
+      operacion: "REGALATE 1 PUNTO ESCRIBE EL #1",
+      respuesta: 1,
+      mensaje: "🎉 CONFETI DE COLORES"
+    },
+    {
+      lugar: "CALLE ECOLOGICA",
+      imagen: "./imagenes/CALLE ECOLOGICA.png",
+      pregunta: "PREGUNTA: EN LA CALLE ECOLÓGICA HAY 6 ÁRBOLES A LA IZQUIERDA Y 4 A LA DERECHA. ¿CUÁNTOS ÁRBOLES HAY EN TOTAL?",
+      operacion: "¡vamos a Sumar arboles!",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 6 + 4 = 10 📣 ¡UN TÚNEL VERDE PARA CAMINAR FELIZ! 🌳😊🌳"
+    },
+    {
+      lugar: "PLAZUELA ZUTAGAO",
+      imagen: "./imagenes/PLAZUELA.png",
+      pregunta: "PREGUNTA: HAY 8 BANCOS EN LA PLAZUELA Y 3 ESTÁN OCUPADOS. ¿CUÁNTOS BANCOS ESTÁN LIBRES?",
+      operacion: "vamos restemos, para la respuesta hallar",
+      respuesta: 5,
+      mensaje: "🔢 PROCESO: 8 – 3 = 5 📣 ¡SUFICIENTES PARA SENTARSE A COMER OBLEAS! 🧁😋"
+    }, 
+    {
+      lugar: "PLAZA DE LOS FUNDADORES",
+      imagen: "./imagenes/PLAZAFUNDA.png",
+      pregunta: "PREGUNTA: EN LA PLAZA DE LOS FUNDADORES HAY 2 FUENTES DE AGUA Y EN CADA UNA NADAN 5 PATITOS. ¿CUÁNTOS PATITOS HAY?",
+      operacion: "Vamos a multiplicar patitos",
+      respuesta: 10,
+      mensaje: "🔢 PROCESO: 2 × 5 = 10 📣 ¡LOS FUNDADORES ESTAN CAUTIVADOS POR TANTA TERNURA! 🦆🦆🦆🦆🦆💧"
+    },
+    {
+      lugar: "PUENTE ECOLOGICO",
+      imagen: "./imagenes/PUENTE-ECO.png",
+      pregunta: "PREGUNTA: IMAGINA EL PUENTE ECOLÓGICO. TIENE 2 TORRES RECTANGULARES, UN CAMINO QUE PARECE UN RECTÁNGULO LARGO Y 4 RUEDAS EN FORMA DE CÍRCULOS PINTADAS A LOS LADOS. ¿CUÁNTAS FIGURAS GEOMÉTRICAS HAY EN TOTAL?",
+      operacion: "Vamos sumemos las figuras",
+      respuesta: 7,
+      mensaje: "🟦 RECTÁNGULOS: 2 TORRES + 1 CAMINO = 3 ⚪ CÍRCULOS: 4 ➡️ TOTAL: 3 + 4 = 7 FIGURAS GEOMÉTRICAS"
+    },
+  ],
+    // ... Agrega 29 preguntas más para Grado 5°
+};
+
+    // Inicialización del juego
+    document.addEventListener('DOMContentLoaded', () => {
+      // Evento para los botones de curso
+      document.querySelectorAll('.course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          playerName = document.getElementById('playerName').value.trim();
+          course = btn.dataset.course;
+
+          if (playerName === '') {
+            alert("Por favor ingresa tu nombre.");
+            return;
+          }
+
+          startGame();
+        });
+      });
+
+      // Botones de control
+      document.getElementById('prevPage').addEventListener('click', prevPage);
+      document.getElementById('nextPage').addEventListener('click', nextPage);
+      document.getElementById('btnSalirAnticipadamente').addEventListener('click', terminarJuego);
+      document.getElementById('exitButton').addEventListener('click', salirAlMenu);
+      document.getElementById('btnNuevoJugador').addEventListener('click', nuevoJugador);
+      document.getElementById('btnFinalizarJuego').addEventListener('click', finalizarJuego);
+      document.getElementById('retryButton').addEventListener('click', reintentar);
+    });
+
+    function startGame() {
+      questions = preguntasPorCurso[course];
+      startTime = Date.now();
+      score = 0;
+      currentPage = 0;
+      
+      document.getElementById('startMenu').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'flex';
+      document.getElementById('gameControls').style.display = 'flex';
+      document.getElementById('finalScreenContainer').style.display = 'none';
+      
+      updateScorePanel();
+      generarTarjetas();
+    }
+
+    function generarTarjetas() {
+      const gameArea = document.getElementById('gameArea');
+      gameArea.innerHTML = '';
+      
+      const inicio = currentPage * cardsPerPage;
+      const fin = Math.min(inicio + cardsPerPage, questions.length);
+      
+      for (let i = inicio; i < fin; i++) {
+        const q = questions[i];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.index = i;
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-face front">
+              <img src="${q.imagen}" alt="${q.lugar}">
+              <strong>${q.lugar}</strong>
+            </div>
+            <div class="card-face back">
+              <p><strong>${q.pregunta}</strong></p>
+              <p><strong>Operación:</strong> ${q.operacion}</p>
+              <input type="number" id="respuesta${i}" placeholder="Respuesta">
+              <button onclick="verificarRespuesta(event, ${i}, ${q.respuesta}, '${q.mensaje}')">Responder</button>
+            </div>
+          </div>
+        `;
+        
+        card.addEventListener('click', function(e) {
+          if (!e.target.closest('button') && !e.target.closest('input')) {
+            this.classList.toggle('flipped');
+          }
+        });
+        
+        const input = card.querySelector('input');
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            verificarRespuesta(e, i, q.respuesta, q.mensaje);
+          }
+        });
+        
+        gameArea.appendChild(card);
+      }
+      
+      updatePaginationControls();
+    }
+
+    function verificarRespuesta(event, index, respuestaCorrecta, mensaje) {
+      event.stopPropagation();
+      const input = document.getElementById(`respuesta${index}`);
+      const card = input.closest('.card');
+      const valor = parseInt(input.value);
+      
+      if (isNaN(valor)) {
+        alert("Por favor ingresa un número válido");
+        return;
+      }
+      
+      if (valor === respuestaCorrecta) {
+        score++;
+        alert(mensaje);
+      } else {
+        alert("❌ Respuesta incorrecta");
+      }
+      
+      // Bloquear tarjeta después de responder
+      card.querySelector('button').disabled = true;
+      setTimeout(() => {
+        card.classList.remove('flipped');
+        card.style.opacity = '0.6';
+        updateScorePanel();
+        verificarFinDelJuego();
+      }, 800);
+    }
+    window.verificarRespuesta = verificarRespuesta;
+
+    function updateScorePanel() {
+      const respondidas = document.querySelectorAll('.card button[disabled]').length;
+      document.getElementById('scorePanel').textContent = 
+        `Puntos: ${score} | Respondidas: ${respondidas}/${questions.length}`;
+    }
+
+    function updatePaginationControls() {
+      document.getElementById('prevPage').disabled = currentPage === 0;
+      document.getElementById('nextPage').disabled = 
+        (currentPage + 1) * cardsPerPage >= questions.length;
+    }
+
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        generarTarjetas();
+      }
+    }
+
+    function nextPage() {
+      if ((currentPage + 1) * cardsPerPage < questions.length) {
+        currentPage++;
+        generarTarjetas();
+      }
+    }
+
+    function verificarFinDelJuego() {
+      const respondidas = document.querySelectorAll('.card button[disabled]').length;
+      if (respondidas === questions.length) {
+        terminarJuego();
+      }
+    }
+
+    function terminarJuego() {
+      const confirmar = confirm("¿Terminar el juego y ver tu puntaje actual?\nNo podrás responder más preguntas.");
+      if (!confirmar) return;
+      
+      const endTime = Date.now();
+      const totalTime = Math.floor((endTime - startTime) / 1000);
+      
+      // Ocultar elementos de juego
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('gameControls').style.display = 'none';
+      
+      // Mostrar pantalla final
+      document.getElementById('finalScreenContainer').style.display = 'block';
+      document.getElementById('finalScore').textContent = 
+        `${playerName} (Grado ${course}°): ${score} puntos en ${totalTime} segundos.`;
+      
+      // Actualizar ranking
+      const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+      ranking.push({
+        nombre: playerName,
+        curso: course,
+        puntaje: score,
+        tiempo: totalTime,
+        fecha: new Date().toLocaleString()
+      });
+      ranking.sort((a, b) => b.puntaje - a.puntaje || a.tiempo - b.tiempo);
+      localStorage.setItem('ranking', JSON.stringify(ranking));
+      
+      mostrarRanking();
+    }
+
+    function salirAlMenu() {
+      if (confirm("¿Volver al menú principal? Se perderá tu progreso actual.")) {
+        resetGame();
+        document.getElementById('startMenu').style.display = 'block';
+        document.getElementById('playerName').value = '';
+        document.getElementById('playerName').focus();
+      }
+    }
+
+    function nuevoJugador() {
+      resetGame();
+      document.getElementById('startMenu').style.display = 'block';
+      document.getElementById('playerName').value = '';
+      document.getElementById('playerName').focus();
+    }
+
+    function finalizarJuego() {
+      if (confirm("¿Borrar todos los puntajes y reiniciar el juego?")) {
+        localStorage.removeItem('ranking');
+        resetGame();
+        document.getElementById('startMenu').style.display = 'block';
+        document.getElementById('playerName').value = '';
+        document.getElementById('rankingPorCurso').innerHTML = '';
+      }
+    }
+
+    function reintentar() {
+      if (retryCount > 0) {
+        retryCount--;
+        document.getElementById('retryButton').textContent = `🔁 Reintentar (${retryCount})`;
+        document.getElementById('finalScreenContainer').style.display = 'none';
+        startGame();
+      }
+      
+      if (retryCount === 0) {
+        document.getElementById('retryButton').style.display = 'none';
+      }
+    }
+
+    function resetGame() {
+      document.getElementById('gameArea').innerHTML = '';
+      document.getElementById('gameControls').style.display = 'none';
+      document.getElementById('finalScreenContainer').style.display = 'none';
+      score = 0;
+      currentPage = 0;
+    }
+
+    function mostrarRanking() {
+      const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+      const rankingDiv = document.getElementById('rankingPorCurso');
+      rankingDiv.innerHTML = '<h3>Ranking por Curso</h3>';
+      
+      // Agrupar por curso
+      const cursos = {};
+      ranking.forEach(item => {
+        if (!cursos[item.curso]) cursos[item.curso] = [];
+        cursos[item.curso].push(item);
+      });
+      
+      // Mostrar tabla por cada curso
+      for (const curso in cursos) {
+        const tabla = document.createElement('table');
+        tabla.innerHTML = `
+          <caption>Grado ${curso}°</caption>
+          <tr>
+            <th>Pos.</th>
+            <th>Nombre</th>
+            <th>Puntos</th>
+            <th>Tiempo</th>
+          </tr>
+          ${cursos[curso].map((jugador, idx) => `
+            <tr ${jugador.nombre === playerName && jugador.curso === course ? 'class="highlight"' : ''}>
+              <td>${idx + 1}</td>
+              <td>${jugador.nombre}</td>
+              <td>${jugador.puntaje}</td>
+              <td>${jugador.tiempo}s</td>
+            </tr>
+          `).join('')}
+        `;
+        rankingDiv.appendChild(tabla);
+      }
+    }
+  </script>
+</body>
+</html>
